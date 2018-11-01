@@ -1,0 +1,139 @@
+---
+title: "Dhirendra"
+output: ODI Datasets
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+odi = read.csv("C:/Users/Administrator/Desktop/sandisk/D/Self/Datasets/odi-batting.csv")
+odi
+```
+```{r}
+summary(odi)
+```
+## Check the Data Structure 
+
+```{r}
+str(odi)
+```
+
+# Top 10 Batsman in this dataset
+
+```{r}
+library(dplyr)
+top_10_batsman = odi%>%group_by(Player)%>%summarise(Total = sum(Runs))%>%arrange(-Total)%>%head(10)
+top_10_batsman
+```
+# Top 10 Ground basic of Runs
+
+```{r}
+top_10_ground = odi%>%group_by(Ground)%>% summarise(Total = sum(Runs))%>%arrange(-Total)%>%head(10)
+top_10_ground
+```
+
+## Top 10 Ground basis of Match
+
+```{r}
+Top_10_Ground_Match = odi%>%group_by(Ground)%>%summarise(Total = n())%>%arrange(-Total)%>%head(10)
+Top_10_Ground_Match
+```
+
+
+## Top Batsman by Century
+
+```{r}
+top_bastsman_cent=odi%>%group_by(Player)%>%summarise(No_of_Cent = sum(Runs>99,na.rm = T))%>%arrange(-No_of_Cent)%>%head(10)
+
+top_bastsman_cent
+
+```
+# Player wise:Total Matches, No. Of Centruries, No. of 50s, No. of Duck
+
+```{r}
+Total_Player = odi %>% group_by(Player)%>%
+  summarise(Tot_Match = n_distinct(MatchDate),
+            No_cent = sum(Runs>99, na.rm = TRUE),
+            No_Fifty = sum(Runs<99 & Runs>49, na.rm = TRUE),
+            No_ducks = sum(Runs==0, na.rm = TRUE)) %>%
+  arrange(-No_cent)
+Total_Player
+```
+
+#Performance of India Aganist all Country
+
+```{r}
+India_per = Total_Count = odi %>% 
+  filter(Country == "India") %>%
+  group_by(Versus) %>%
+    summarise(Tot_match_India = n_distinct(MatchDate),
+            No_runs = sum(Runs, na.rm = TRUE),
+            No_of_Cent = sum(Runs>99, na.rm = TRUE),
+            Aver_Runs_Match = round((No_runs/Tot_match_India),2)) %>%arrange(-Tot_match_India)
+India_per
+```
+## For each Player find the highest Score
+
+```{r}
+Highest_Runs = odi%>%group_by(Player)%>%summarise(Highest_Runs_Player = max(Runs,na.rm = T))%>%
+  arrange(-Highest_Runs_Player)%>%head(10)
+Highest_Runs
+```
+
+### # Country and Player_Total Runs
+
+```{r}
+Double_group = odi%>%
+  group_by(Country, Player, Ground)%>%
+  summarise(Total.Runs = sum(Runs, na.rm = TRUE))%>% arrange(-Total.Runs)%>% head(10)
+Double_group
+```
+
+## Now Doing some visualization for better understanding way through ggplot2
+
+```{r}
+top_10_batsman = odi%>%group_by(Player)%>%summarise(Total = sum(Runs))%>%arrange(-Total)%>%head(10)
+top_10_batsman
+```
+
+```{r}
+library(ggplot2)
+
+graph_1 = ggplot(top_10_batsman, aes(x = reorder(Player, -Total), y = Total)) +
+  geom_bar(stat = "identity", width = .5, aes(fill = Player)) + theme_bw()+theme(axis.text.x = element_text(angle = 90))+labs(title = "Bar Chart", subtitle = "Top 10 Batsman",
+                         x= "Player Name", y= "No. of Runs ", caption = "www.google.com")
+
+graph_1
+
+```
+
+```{r}
+graph_2 = graph_1+geom_text(aes(label=Total),
+                          position = position_dodge(width = .7), vjust = -.25)+
+  theme(legend.position = "bottom") +
+  theme(legend.key.width = unit(.2, "cm"))+
+  theme(legend.title = element_blank())
+
+graph_2
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
