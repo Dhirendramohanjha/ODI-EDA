@@ -1,0 +1,156 @@
+---
+title: "Untitled"
+author: "Dhirendra Mohan"
+date: "26 September 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+sharks_csv = read.csv('C:/Users/Administrator/Downloads/attacks.csv/attacks.csv')
+shark = sharks_csv[1:6303,-c(17,18,19,20,21,22,23,24)]
+View(shark)
+library(dplyr)
+library(ggplot2)
+
+```
+
+
+```{r}
+##1) Number of shark attacks per year
+year_wise = shark%>% filter(Year>1900)%>%
+  group_by(Year)%>%summarise(total_attacks=n())
+ggplot(year_wise,aes(Year,total_attacks)) + geom_point(color = 'Blue') + geom_line() +
+    scale_x_continuous(breaks = seq(1901,2018,1)) + scale_y_continuous(breaks = seq(1,150,10))+
+    theme(axis.text.x = element_text(angle = 90)) +
+    labs(title = 'Total Attacks per Year',x = 'Year',y = 'No. of Attacks')
+
+```
+
+
+
+```{r}
+##2) Number of shark attacks per area
+  
+  area = shark%>% filter(Area!="")%>% group_by(Area)%>%
+    summarise(numberofattacks = n())
+View(area)    
+
+area1 = area%>% filter(numberofattacks>50)
+View(area1)
+
+
+ggplot(area1,aes(reorder(Area,-numberofattacks),numberofattacks)) + 
+  geom_bar(stat = 'Identity',width = 0.5,aes(fill = Area)) +
+  geom_text(aes(label = numberofattacks),position = position_dodge(width = 0.9),vjust = -0.25) +
+  labs(title = 'AreaWise most Attacks',x = 'Area',y = 'No. of Attacks') + 
+  theme(axis.text.x = element_blank(),axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),axis.ticks.y = element_blank(),legend.position = 'bottom') +
+  scale_fill_discrete(name = '')
+
+```
+
+```{r}
+##3) Number of shark attacks by country
+
+country = shark%>% filter(Country!="")%>% group_by(Country)%>%
+  summarise(total_attacks=n())
+
+country1 = country%>%filter(total_attacks>50)
+View(country1)
+ggplot(country1,aes(reorder(Country,-total_attacks),total_attacks)) + 
+  geom_bar(stat = 'Identity',width = 0.5,aes(fill = Country)) +
+  geom_text(aes(label = total_attacks),position = position_dodge(width = 0.9),vjust = -0.25) +
+  labs(title = 'Countrywise most Attacks',x = 'Country',y = 'No. of Attacks') + 
+  theme(axis.text.x = element_blank(),axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),axis.ticks.y = element_blank(),legend.position = 'bottom') +
+  scale_fill_discrete(name = '')
+```
+
+```{r}
+##4)Most attacks in terms of activity
+activity = shark%>%group_by(Activity)%>%
+  summarise(total_activities_attacks = n())
+
+
+activity_50 = activity%>%filter(Activity!="",total_activities_attacks>10)
+
+
+
+ggplot(activity_50,aes(reorder(Activity,-total_activities_attacks),total_activities_attacks)) + 
+  geom_bar(stat = 'Identity',width = 0.5,aes(fill =Activity)) +
+  geom_text(aes(label = total_activities_attacks),position = position_dodge(width = 0.9),vjust = -0.25) +
+  labs(title = 'Activitywise most Attacks',x = 'Activity',y = 'No. of Attacks') + 
+  theme(axis.text.x = element_blank(),axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),axis.ticks.y = element_blank(),legend.position = 'bottom') +
+  scale_fill_discrete(name = '')
+```
+
+```{r}
+##5)Do sharks discriminate against women
+
+total_men_women = shark%>% filter(Sex=='F'|Sex=='M')%>% group_by(Sex)%>%
+  summarise(number=n())
+View(total_men_women)
+
+x = c(5094,637)
+labels = c("Male","Female")
+piepercent<- round(100*x/sum(x), 1)
+
+
+#Plot the chart with title and rainbow color pallet.
+pie(x, labels = piepercent, main = " pie chart",col = rainbow(length(x)))
+legend("topright", c("Male","Female"), cex = 0.8,
+       fill = rainbow(length(x)))
+
+
+
+# Create data for the graph.
+x = c(5094,637)
+labels =  c("Male","Female")
+
+piepercent<- round(100*x/sum(x), 1)
+
+
+# Plot the chart.
+pie(x, labels = piepercent, main = " pie chart",col = rainbow(length(x)))
+legend("topright", c("Male","Female"), cex = 0.8,
+       fill = rainbow(length(x)))
+
+
+```
+```{r}
+provocation = shark%>%filter(Type== "Provoked"|Type=="Unprovoked")%>%
+  group_by(Type)%>%summarise(total_types=n())
+View(provocation)
+
+
+x = c(4595,574)
+labels =  c("Unprovoked","Provoked")
+
+piepercent<- round(100*x/sum(x), 1)
+
+
+# Plot the chart.
+pie(x, labels = piepercent, main = " pie chart",col = rainbow(length(x)))
+legend("topright", c("Unprovoked","Provoked"), cex = 0.8,
+       fill = rainbow(length(x)))
+```
+
+```{r}
+
+fatalities = shark%>%filter(Fatal..Y.N.=="Y")%>%filter(Area!="")%>%
+  group_by(Area)%>%summarise(total_fatalities=n())%>%arrange(-total_fatalities)%>%
+  head(10)
+View(fatalities)
+
+ggplot(fatalities,aes(reorder(Area,-total_fatalities),total_fatalities)) + 
+  geom_bar(stat = 'Identity',width = 0.5,aes(fill = Area)) +
+  geom_text(aes(label = total_fatalities),position = position_dodge(width = 0.9),vjust = -0.25) +
+  labs(title = 'Regionwise most Fatalities',x = 'Region',y = 'No. of Fatalities') + 
+  theme(axis.text.x = element_blank(),axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),axis.ticks.y = element_blank(),legend.position = 'bottom') +
+  scale_fill_discrete(name = '')
+
+
+```
+
